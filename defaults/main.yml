@@ -1,0 +1,9 @@
+---
+fonts:
+  user:
+  copy_system: []
+  copy_user: []
+  apt: []
+
+# apt:
+# fonts-powerline # https://github.com/powerline/fonts

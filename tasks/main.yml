@@ -1,0 +1,35 @@
+---
+# NOTES
+# -----
+# /usr/share/fonts (system-wide)
+# ~/.local/share/fonts (user-specific)
+# ~/.fonts (user-specific)
+
+- name: fonts role
+  tags:
+    - fonts
+    - font
+  block:
+
+  # apt fonts
+  - when: 
+    - fonts.apt != None
+    - fonts.apt | length > 0
+    name: Install font via apt
+    become: true
+    ansible.builtin.apt:
+      state: latest
+      name: "{{ fonts.apt }}"
+
+  # copy system font files
+  - when: fonts.copy_system | length > 0
+    name: Copy {{ fonts.copy_system }}
+    become: true
+    notify: Update font cache
+    loop: "{{ fonts.copy_system }}"
+    ansible.builtin.copy:
+      src: "{{ item }}/"
+      dest: "/usr/share/fonts/{{ item }}"
+      owner: root
+      group: root
+      mode: u=rw,g=rx,o=rx
