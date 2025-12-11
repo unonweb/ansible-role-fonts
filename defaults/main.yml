@@ -1,9 +1,12 @@
 ---
-fonts:
-  user:
-  copy_system: []
-  copy_user: []
-  apt: []
+fonts_apt: []
+fonts_system_dir: /usr/share/fonts
+fonts_system_copy: []
+fonts_system_remove: []
+fonts_user:
+fonts_user_dir: "{{ fonts_user }}/.local/share/fonts"
+fonts_user_copy: []
+fonts_user_remove: []
 
 # apt:
 # fonts-powerline # https://github.com/powerline/fonts

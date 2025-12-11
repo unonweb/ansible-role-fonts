@@ -1,35 +1,64 @@
 ---
-# NOTES
-# -----
-# /usr/share/fonts (system-wide)
-# ~/.local/share/fonts (user-specific)
-# ~/.fonts (user-specific)
-
 - name: fonts role
   tags:
     - fonts
     - font
   block:
 
-  # apt fonts
-  - when: 
-    - fonts.apt != None
-    - fonts.apt | length > 0
-    name: Install font via apt
+  # fonts_apt
+  - when: fonts_apt | length > 0
+    name: apt install {{ fonts_apt }}
     become: true
     ansible.builtin.apt:
-      state: latest
-      name: "{{ fonts.apt }}"
+      state: present
+      name: "{{ fonts_apt }}"
 
-  # copy system font files
-  - when: fonts.copy_system | length > 0
-    name: Copy {{ fonts.copy_system }}
+  # fonts_system_copy
+  - when: fonts_system_copy | length > 0
+    name: Copy {{ fonts_system_copy }}
     become: true
     notify: Update font cache
-    loop: "{{ fonts.copy_system }}"
+    loop: "{{ fonts_system_copy }}"
     ansible.builtin.copy:
-      src: "{{ item }}/"
-      dest: "/usr/share/fonts/{{ item }}"
+      src: "{{ item }}"
+      dest: "{{ fonts_system_dir }}/{{ item }}"
       owner: root
       group: root
       mode: u=rw,g=rx,o=rx
+  
+  # fonts_system_remove
+  - when: fonts_system_remove | length > 0
+    name: Remove {{ fonts_system_remove }}
+    become: true
+    failed_when: false
+    loop: "{{ fonts_system_remove }}"
+    ansible.builtin.file:
+      state: absent
+      path: "{{ fonts_system_dir }}/{{ item }}"
+
+  # fonts_user_copy
+  - when:
+    - fonts_user != None
+    - fonts_user_copy | length > 0
+    name: Copy {{ fonts_user_copy }}
+    become: true
+    notify: Update font cache
+    loop: "{{ fonts_user_copy }}"
+    ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: "{{ fonts_user_dir }}/{{ item }}"
+      owner: "{{ fonts_user }}"
+      group: "{{ fonts_user }}"
+      mode: u=rw,g=rx,o=rx
+  
+  # fonts_user_remove
+  - when: 
+    - fonts_user != None
+    - fonts_user_remove | length > 0
+    name: Remove {{ fonts_user_remove }}
+    become: true
+    failed_when: false
+    loop: "{{ fonts_user_remove }}"
+    ansible.builtin.file:
+      state: absent
+      path: "{{ fonts_user_dir }}/{{ item }}"
