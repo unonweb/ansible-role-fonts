@@ -3,6 +3,7 @@ fonts_apt: []
 fonts_system_dir: /usr/share/fonts
 fonts_system_copy: []
 fonts_system_remove: []
+fonts_system_download: [] # [ url: string, name: string ]
 fonts_user:
 fonts_user_dir: "{{ fonts_user }}/.local/share/fonts"
 fonts_user_copy: []

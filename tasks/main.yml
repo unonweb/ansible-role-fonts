@@ -62,3 +62,44 @@
     ansible.builtin.file:
       state: absent
       path: "{{ fonts_user_dir }}/{{ item }}"
+
+  # fonts_system_download
+  - when: fonts_system_download | length > 0
+    block:
+
+    # assert
+    - name: Assertions for {{ fonts_system_download }}
+      loop: "{{ fonts_system_download }}"
+      ansible.builtin.assert:
+        that:
+        - item.url is defined
+        - item.url.endswith('.zip')
+        - item.name is defined
+
+    # download
+    - name: Download fonts {{ fonts_system_download }}
+      delegate_to: localhost
+      loop: "{{ fonts_system_download }}"
+      ansible.builtin.get_url:
+        url: "{{ item.url }}"
+        dest: "/tmp/{{ item.url | basename }}"
+        force: false
+
+    # mkdir
+    - name: Mkdirs for {{ fonts_system_download }}
+      become: true
+      loop: "{{ fonts_system_download }}"
+      ansible.builtin.file:
+        path: "{{ fonts_system_dir }}/{{ item.name }}"
+        mode: u=rwx,g=rx,o=rx
+        state: directory
+
+    # unzip
+    - name: Unzip {{ fonts_system_download }}
+      become: true
+      notify: Update font cache
+      loop: "{{ fonts_system_download }}"
+      ansible.builtin.unarchive:
+        src: "/tmp/{{ item.url | basename }}"
+        dest: "{{ fonts_system_dir }}/{{ item.name }}"
+        remote_src: false # true - unpack an archive which already exists on the target
